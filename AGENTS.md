@@ -104,7 +104,7 @@ and `output_format`, which is locked), `data/` (dataset, `test_ledger.json`,
 
 | Date | Step | State | Notes |
 |---|---|---|---|
-| 2026-11-08 | 0 | done | AGENTS.md, CLAUDE.md, .gitignore, 3 specs in docs/ (BUILD_STEPS pending, item 5). Groq reachable, UA quirk found |
+| 2026-11-08 | 0 | done | AGENTS.md, CLAUDE.md, .gitignore, 4 specs in docs/. Step 5 check 4 now matches key-shaped strings only (Richard approved). Groq reachable, UA quirk found |
 | | 1 | next | groq_client.py, tests/test_client.py, LIMITS.md (needs key + console limits) |
 
 ## Open items
@@ -113,7 +113,4 @@ and `output_format`, which is locked), `data/` (dataset, `test_ledger.json`,
 2. Richard fills in `LIMITS.md` from the Groq console (Step 1, check 4).
 3. Richard approves `prompts/v000.json` before any eval (Step 3).
 4. Richard records the 15-ad spot-check in `data/spotcheck.md` before freezing (Step 2).
-5. BUILD_STEPS Step 5 check 4 (`git log -p | grep -c` on the key prefix) can never print 0,
-   because BUILD_STEPS.md contains that string. Proposed fix: match key-shaped strings only
-   (`gs[k]_[A-Za-z0-9]{20,}`). Waiting on Richard. Until then BUILD_STEPS.md isn't committed.
-6. EVAL_SPEC §7.9: revisit using a non-gpt-oss generator after the first full run.
+5. EVAL_SPEC §7.9: revisit using a non-gpt-oss generator after the first full run.
