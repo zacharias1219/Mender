@@ -24,6 +24,10 @@ GEN_PARAMS = {"temperature": 1.0, "max_completion_tokens": 2048, "reasoning_effo
               "response_format": {"type": "json_object"}}
 MAX_ATTEMPTS = 4  # first try plus up to 3 retries
 AVOID_CAP = 12    # retries name this ad's collisions plus the run's most recent ones, up to 12
+# A retry also gets a writing style, so its wording really changes (attempt k uses STYLES[k-1]).
+STYLES = ["a warm, conversational second-person voice that opens with a question",
+          "a brisk, clinical, fact-first voice with short sentences",
+          "a story-like voice that opens with a short scene from a patient's day"]
 SPLITS = {"train": 36, "gate": 27, "test": 27}
 CLEAN = {"train": 10, "gate": 8, "test": 8}
 FLOOR = {"train": 2, "gate": 1, "test": 1}
@@ -169,6 +173,9 @@ def recipe_prompt(r, attempt, avoid):
                      "violations'. It does not make the ad compliant; label only the real violations.")
     if held is False and ({"a1", "a2", "near_miss"} & set(r["flags"])):
         lines.append("Never use the words 'guidance' or 'guarantee' in any form.")
+    if attempt:
+        lines.append(f"Write in {STYLES[(attempt - 1) % len(STYLES)]}. Phrase every notice and claim "
+                     "in unusual words of your own, unlike typical ad copy.")
     if avoid:
         lines.append("Do not reuse these phrases from another ad: " + "; ".join(avoid) + ".")
     return [{"role": "system", "content": SYSTEM}, {"role": "user", "content": "\n".join(lines)}]
@@ -243,9 +250,22 @@ def check_case(case, held):
 
 
 def generate(log=print):
-    """Generate every recipe through the cache; write data/draft.jsonl. Returns (cases, failures)."""
+    """Fill every recipe; write data/draft.jsonl. Returns (cases, failures).
+
+    An ad already in the draft is kept if it still passes its checks and C6 against the ads
+    before it, so a prompt change never reshuffles accepted ads. Missing ads are generated
+    through the cache.
+    """
+    kept = {c["id"]: c for c in read_jsonl(DRAFT)} if os.path.exists(DRAFT) else {}
     cases, failures, seen = [], [], []  # seen: every colliding 8-gram so far, in order
     for r in recipes():
+        old = kept.get(r["id"])
+        if old and old["flags"] == r["flags"] and {l["rule"] for l in old["labels"]} == set(r["rules"]) \
+                and not check_case(old, r["split"] != "train") \
+                and not any(near_dup(old["text"], c["text"]) for c in cases):
+            cases.append(old)
+            log(f"{r['id']}: ok (draft)")
+            continue
         avoid, problems = [], []
         for attempt in range(MAX_ATTEMPTS):
             hint = (avoid + [x for x in seen[-AVOID_CAP:] if x not in avoid])[:AVOID_CAP] if attempt else []

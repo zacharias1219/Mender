@@ -171,6 +171,11 @@ class FreezeAndHashTest(unittest.TestCase):
             self.addCleanup(p.stop)
         gd.write_jsonl(gd.DRAFT, fixture())
 
+    def test_generate_keeps_valid_draft_ads_without_calls(self):
+        with mock.patch.object(gd.gc, "chat", side_effect=AssertionError("API called")):
+            cases, failures = gd.generate(log=lambda *_: None)
+        self.assertEqual((len(cases), failures), (90, []))
+
     def test_spotcheck_gate(self):
         h = gd.sha256(gd.DRAFT)
         self.assertFalse(gd.spotcheck_passed(h)[0])  # no file yet
