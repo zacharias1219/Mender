@@ -10,7 +10,7 @@ For each ad, decide whether the labels are right: the rule set is correct, every
 
 Labels: R1 missing_disclosure: "isotretinoin"
 
-- [ ] correct
+- [x] correct
 - [ ] wrong. Note:
 
 ## 2. te18 (test; flags: none)
@@ -19,7 +19,7 @@ Labels: R1 missing_disclosure: "isotretinoin"
 
 Labels: R2 regulatory_claim: "FDA's seal of approval"
 
-- [ ] correct
+- [x] correct
 - [ ] wrong. Note:
 
 ## 3. ga17 (gate; flags: none)
@@ -29,7 +29,7 @@ Labels: R2 regulatory_claim: "FDA's seal of approval"
 
 Labels: R3 absolute_safety: "100% safe"
 
-- [ ] correct
+- [x] correct
 - [ ] wrong. Note:
 
 ## 4. tr33 (train; flags: none)
@@ -38,7 +38,7 @@ Labels: R3 absolute_safety: "100% safe"
 
 Labels: R4 testimonial: "Thousands of women say KindHealth's virtual menopause program transformed their daily comfort"
 
-- [ ] correct
+- [x] correct
 - [ ] wrong. Note:
 
 ## 5. tr30 (train; flags: none)
@@ -48,7 +48,7 @@ Labels: R4 testimonial: "Thousands of women say KindHealth's virtual menopause p
 
 Labels: R5 false_urgency: "just five consultation slots remaining"
 
-- [ ] correct
+- [x] correct
 - [ ] wrong. Note:
 
 ## 6. ga20 (gate; flags: none)
@@ -58,7 +58,7 @@ Labels: R5 false_urgency: "just five consultation slots remaining"
 
 Labels: R6 cure_claim: "permanently reverse hair loss"
 
-- [ ] correct
+- [x] correct
 - [ ] wrong. Note:
 
 ## 7. te03 (test; flags: clean)
@@ -67,7 +67,7 @@ Labels: R6 cure_claim: "permanently reverse hair loss"
 
 Labels: none (compliant)
 
-- [ ] correct
+- [x] correct
 - [ ] wrong. Note:
 
 ## 8. ga23 (gate; flags: clean)
@@ -76,7 +76,7 @@ Labels: none (compliant)
 
 Labels: none (compliant)
 
-- [ ] correct
+- [x] correct
 - [ ] wrong. Note:
 
 ## 9. ga10 (gate; flags: clean)
@@ -85,7 +85,7 @@ Labels: none (compliant)
 
 Labels: none (compliant)
 
-- [ ] correct
+- [x] correct
 - [ ] wrong. Note:
 
 ## 10. ga21 (gate; flags: a1)
@@ -94,7 +94,7 @@ Labels: none (compliant)
 
 Labels: R6 cure_claim: "the issue no longer bothers them"
 
-- [ ] correct
+- [x] correct
 - [ ] wrong. Note:
 
 ## 11. ga26 (gate; flags: a2, multi)
@@ -103,7 +103,7 @@ Labels: R6 cure_claim: "the issue no longer bothers them"
 
 Labels: R2 regulatory_claim: "FDA-cleared"; R3 absolute_safety: "100% safe"
 
-- [ ] correct
+- [x] correct
 - [ ] wrong. Note:
 
 ## 12. ga07 (gate; flags: clean, near_miss)
@@ -113,7 +113,7 @@ Labels: R2 regulatory_claim: "FDA-cleared"; R3 absolute_safety: "100% safe"
 
 Labels: none (compliant)
 
-- [ ] correct
+- [x] correct
 - [ ] wrong. Note:
 
 ## 13. te12 (test; flags: multi)
@@ -122,7 +122,7 @@ Labels: none (compliant)
 
 Labels: R2 regulatory_claim: "FDA-cleared"; R6 cure_claim: "promises to cure seasonal allergies forever"
 
-- [ ] correct
+- [x] correct
 - [ ] wrong. Note:
 
 ## 14. tr18 (train; flags: none)
@@ -132,7 +132,7 @@ Labels: R2 regulatory_claim: "FDA-cleared"; R6 cure_claim: "promises to cure sea
 
 Labels: R6 cure_claim: "will cure your nicotine addiction"
 
-- [ ] correct
+- [x] correct
 - [ ] wrong. Note:
 
 ## 15. ga03 (gate; flags: clean)
@@ -141,10 +141,10 @@ Labels: R6 cure_claim: "will cure your nicotine addiction"
 
 Labels: none (compliant)
 
-- [ ] correct
+- [x] correct
 - [ ] wrong. Note:
 
 ## Result
 
-Result: __ / 15 correct
-Checked by: __
+Result: 15 / 15 correct
+Checked by: Richard, 2026-11-08 (verdict "all correct" given in chat; recorded in this file by Claude because Richard could not edit it)

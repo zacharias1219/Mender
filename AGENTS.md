@@ -148,12 +148,12 @@ and `output_format`, which is locked), `data/` (dataset, `test_ledger.json`,
 |---|---|---|---|
 | 2026-11-08 | 0 | done | AGENTS.md, CLAUDE.md, .gitignore, 4 specs in docs/. Step 5 check 4 now matches key-shaped strings only (Richard approved). Groq reachable, UA quirk found |
 | 2026-11-08 | 1 | done | groq_client.py and 11 offline tests. Live ping OK on both models, replay 0 calls. LIMITS.md filled (30 RPM, 1K RPD, 8K TPM, 200K TPD per model). Loop budget decision deferred to after Step 3 |
-| 2026-11-08 | 2 | checks 1-2 pass; 3 waits on Richard | 90-ad draft: C1-C8 PASS, keyword F1 gate 0.548, test 0.407. 35 offline tests pass. data/spotcheck.md is ready for Richard's verdicts, then --freeze (check 4) and the tamper test (check 5) |
+| 2026-11-08 | 2 | done | Frozen data/dataset.jsonl sha256 c6cc2e21d334541ba16715ed231ff5afe62f42b1e4d5de05e16272c50ea073de. C1-C8 PASS, keyword F1 gate 0.548, test 0.407 (S10). Spot-check 15/15: Richard said "all correct" in chat, Claude recorded it (S9). Tamper test aborts before any call (G9) |
+| | 3 | next | evaluate.py reviewer, prompts/v000.json (Richard approves), tests/test_eval.py. Then measure tokens per call and set ROUNDS/CANDIDATES in LIMITS.md |
 
 ## Open items
 
 1. Final branch and PR target: session branch vs `selfrepair-v1` into `main` (ask Richard).
 2. Choose ROUNDS and CANDIDATES in LIMITS.md after Step 3 measures reviewer tokens per call, before any run.
 3. Richard approves `prompts/v000.json` before any eval (Step 3).
-4. Richard records the 15-ad spot-check in `data/spotcheck.md` before freezing (Step 2).
-5. EVAL_SPEC §7.9: revisit using a non-gpt-oss generator after the first full run.
+4. EVAL_SPEC §7.9: revisit using a non-gpt-oss generator after the first full run.
