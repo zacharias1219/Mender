@@ -7,8 +7,7 @@
 - At the end of each session, update the AGENTS.md status log and open items, then commit
   and push. Cloud containers are deleted, and unpushed work is lost.
 - Read the spec in `docs/` that covers the current step before writing its code.
-- Secrets: never ask for the Groq key in chat. Use the secure credential form for
-  `api.groq.com`. Never run commands that echo `$GROQ_API_KEY`. For the G10 check, use
-  `grep -rqF -- "$GROQ_API_KEY" runs data && echo LEAK || echo clean`.
+- Secrets: never ask for the Groq key in chat. It's a proxy-injected network secret (see
+  AGENTS.md, "Key handling"). Never run commands that echo `$GROQ_API_KEY`.
 - Before saying a step is done, paste the real acceptance-command output (trimmed) into
   the reply.

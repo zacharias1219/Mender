@@ -84,10 +84,14 @@ and `output_format`, which is locked), `data/` (dataset, `test_ledger.json`,
 - **Cloudflare blocks Python's default `User-Agent`** with `403 error code: 1010`. Every
   request must send a custom one, such as `User-Agent: mender-selfrepair/1`. With it, Groq
   answers normally (401 without a key).
-- Preferred key handling: save the key as a network secret for `api.groq.com` through the
-  secure credential form, so the proxy injects it and the real key never enters the
-  container. Then set `GROQ_API_KEY` to any placeholder (for example `placeholder-not-a-key`) so
-  the client starts. The G10 grep is still run.
+- Key handling (in place since 2026-11-08): cloud sessions run on the personal "Mender"
+  environment. Its network secret for `api.groq.com` is added to requests by the proxy, so
+  the real key never enters the container. Run live commands with
+  `GROQ_API_KEY=proxy-injected`. The value only gets the client past its check, and the
+  proxy replaces the header. For G10, scan for key-shaped strings:
+  `grep -rlE 'gs[k]_[A-Za-z0-9]{20,}|Bearer' runs data cache` must print nothing. On a
+  local machine with a real key in the shell, also run the literal
+  `grep -r "$GROQ_API_KEY"` check.
 - The `gh` CLI can't create or merge PRs here. Use the GitHub MCP tools for Step 5.
 - The container is ephemeral. Anything worth keeping must be committed and pushed.
   `runs/` isn't committed, so copy the final `REPORT.md` and `report.svg` into
@@ -105,7 +109,8 @@ and `output_format`, which is locked), `data/` (dataset, `test_ledger.json`,
 | Date | Step | State | Notes |
 |---|---|---|---|
 | 2026-11-08 | 0 | done | AGENTS.md, CLAUDE.md, .gitignore, 4 specs in docs/. Step 5 check 4 now matches key-shaped strings only (Richard approved). Groq reachable, UA quirk found |
-| | 1 | next | groq_client.py, tests/test_client.py, LIMITS.md (needs key + console limits) |
+| 2026-11-08 | 1 | checks 1-3 pass; 4 waits on Richard | groq_client.py and 11 offline tests. Live ping OK on both models, replay 0 calls. Headers: RPD 1,000, TPM 8,000 per model. LIMITS.md needs RPM and TPD from the console |
+| | 2 | next | gen_data.py, tests/test_validator.py (starts after check 4) |
 
 ## Open items
 
