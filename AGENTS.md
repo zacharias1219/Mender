@@ -149,11 +149,10 @@ and `output_format`, which is locked), `data/` (dataset, `test_ledger.json`,
 | 2026-11-08 | 0 | done | AGENTS.md, CLAUDE.md, .gitignore, 4 specs in docs/. Step 5 check 4 now matches key-shaped strings only (Richard approved). Groq reachable, UA quirk found |
 | 2026-11-08 | 1 | done | groq_client.py and 11 offline tests. Live ping OK on both models, replay 0 calls. LIMITS.md filled (30 RPM, 1K RPD, 8K TPM, 200K TPD per model). Loop budget decision deferred to after Step 3 |
 | 2026-11-08 | 2 | done | Frozen data/dataset.jsonl sha256 c6cc2e21d334541ba16715ed231ff5afe62f42b1e4d5de05e16272c50ea073de. C1-C8 PASS, keyword F1 gate 0.548, test 0.407 (S10). Spot-check 15/15: Richard said "all correct" in chat, Claude recorded it (S9). Tamper test aborts before any call (G9) |
-| | 3 | next | evaluate.py reviewer, prompts/v000.json (Richard approves), tests/test_eval.py. Then measure tokens per call and set ROUNDS/CANDIDATES in LIMITS.md |
+| 2026-11-08 | 3 | done | Checks 1-5 pass. v000 rule_definitions made terse with Richard's approval (the first v000 scored train F1 0.896, above the 0.80 headroom bound). v000: train F1 0.769, gate 0.667, R1 recall 0.167/0.000, about 570 tokens per call. Budget ROUNDS=3, CANDIDATES=2 in LIMITS.md |
+| | 4 | next | gate.py, repair.py, run loop, report.py, tests; one proof run |
 
 ## Open items
 
 1. Final branch and PR target: session branch vs `selfrepair-v1` into `main` (ask Richard).
-2. Choose ROUNDS and CANDIDATES in LIMITS.md after Step 3 measures reviewer tokens per call, before any run.
-3. Richard approves `prompts/v000.json` before any eval (Step 3).
-4. EVAL_SPEC §7.9: revisit using a non-gpt-oss generator after the first full run.
+2. EVAL_SPEC §7.9: revisit using a non-gpt-oss generator after the first full run.

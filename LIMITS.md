@@ -33,12 +33,21 @@ Tokens per day bind first. The tokens per call below are estimates, until Step 3
   exhaust their retries and the run aborts. Everything is cached, so rerunning the same
   command the next day resumes at no cost (abort rule 4).
 
-## Decision (pending: must close before any `run.py run`, after Step 3 measures tokens per call)
+## Decision (recorded 2026-11-08, before any `run.py run`)
 
-Levers, in the order to try them. None of them touch the test split.
-1. Fewer reviewer tokens per call: `reasoning_effort` "low" and a compact `v000.json`.
-2. `CANDIDATES` 3 to 2 (cuts each round by about a third).
-3. `ROUNDS` 8 to 4.
+Richard chose **ROUNDS = 3, CANDIDATES = 2** for a single proof run. Thresholds and
+guarantees are unchanged. Measured reviewer cost (Step 3): about 570 tokens per call
+(v000: 20,367 tokens over 36 train calls, 15,445 over 27 gate calls).
 
-The worst case and the chosen values will be written here before any run. They must not
-be changed after seeing results.
+| Item | Calls (worst case) | Tokens at ~570/call |
+|---|---|---|
+| Baseline train + gate (cached after Step 3) | 63 | 0 new |
+| Per candidate: gate 27 + train 36 + confirmations up to ~20 | ~83 | ~47K |
+| Per round: 2 candidates + up to 2 stability reruns of 27 + 1 repair call (120b) | ~220 | ~125K |
+| 3 rounds | ~660 | ~375K |
+| Final test scoring, v000 + final | 54 | ~31K |
+| **Total worst case (20b)** | **~715** | **~405K, about 2 accounts' daily 20b quota** |
+
+Short-circuiting (most candidates stop after the 27-ad gate check) makes a typical run
+about half of that. If a quota runs out, the run aborts and is resumable from cache, after
+the key is swapped through the secure form.
