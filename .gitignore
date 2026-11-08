@@ -218,3 +218,24 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# --- Mender project (keep dense; one pattern per line) ---
+# Run output, Groq response cache, temp writes (atomic cache = write tmp, then rename)
+runs/
+cache/
+*.tmp
+*.partial
+# Secrets: any env/key file anywhere; only a template may be committed
+.env*
+!.env.example
+*.key
+*.pem
+*.secret
+secrets.*
+# Personal agent/editor state (CLAUDE.md, AGENTS.md, .claude/settings.json stay tracked)
+CLAUDE.local.md
+.claude/settings.local.json
+.vscode/
+.idea/
+*.swp
+.DS_Store
