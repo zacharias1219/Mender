@@ -120,6 +120,18 @@ and `output_format`, which is locked), `data/` (dataset, `test_ledger.json`,
   are the frozen bytes. It refuses unless C1 to C8 pass, `data/spotcheck.md` names this
   draft's hash with `Result: N / 15` where N >= 14, and the keyword baseline is < 0.70 on
   gate and test. The draft is committed while under review.
+- **R1 notice (b) trigger:** any mention of a prescription or prescribing counts, even with
+  no named drug ("get a prescription"). This is my reading of "prescription medication
+  mentioned", for Richard to confirm, and Step 3's rule definitions must say the same.
+  `check_case` rejects an ad that isn't labeled R1, mentions prescribing, and lacks
+  "clinically" or "appropriate".
+- **C8 balance:** compliant ads carry every notice, so they run long. Compliant-ad prompts
+  ask for 40-55 words.
+- **Generation history (2026-11-08):** it took 3 Groq accounts, because each account's
+  200K tokens/day ran out on 120b. Fixes found along the way: Groq returns 400
+  `json_validate_failed` for invalid JSON (counted as a failed attempt); curly quotes must
+  be normalized after parsing, not before; and rerunning keeps accepted draft ads, so a
+  prompt tweak doesn't ripple.
 - **Scoring core** (`evaluate.overlaps`, `score_case`, `micro`) was written in Step 2 for
   the keyword baseline. Step 3 adds the reviewer on top of it.
 
@@ -136,7 +148,7 @@ and `output_format`, which is locked), `data/` (dataset, `test_ledger.json`,
 |---|---|---|---|
 | 2026-11-08 | 0 | done | AGENTS.md, CLAUDE.md, .gitignore, 4 specs in docs/. Step 5 check 4 now matches key-shaped strings only (Richard approved). Groq reachable, UA quirk found |
 | 2026-11-08 | 1 | done | groq_client.py and 11 offline tests. Live ping OK on both models, replay 0 calls. LIMITS.md filled (30 RPM, 1K RPD, 8K TPM, 200K TPD per model). Loop budget decision deferred to after Step 3 |
-| 2026-11-08 | 2 | in progress | gen_data.py, run.py gen-data, tests/test_validator.py (22 tests). Pilot fixed missing notices and typography |
+| 2026-11-08 | 2 | checks 1-2 pass; 3 waits on Richard | 90-ad draft: C1-C8 PASS, keyword F1 gate 0.548, test 0.407. 35 offline tests pass. data/spotcheck.md is ready for Richard's verdicts, then --freeze (check 4) and the tamper test (check 5) |
 
 ## Open items
 

@@ -81,9 +81,9 @@ DONT = {"R2": "no FDA or agency approval, clearance, endorsement, or seal for th
         "R6": "no cure, reversal, or permanent-removal claim and no guaranteed outcome of any kind"}
 NOTICE_TEXT = {
     None: "Notices: the ad mentions a condition or treatment, so it must include a not-for-emergencies "
-          "notice. If it names a prescription medication, it must also say the medication is prescribed "
-          "only if clinically appropriate. If it states a subscription price, it must also give recurring "
-          "billing terms.",
+          "notice. If it mentions any prescription or prescribing at all, even without naming a drug, it "
+          "must also say prescriptions are given only if clinically appropriate. If it states a "
+          "subscription price, it must also give recurring billing terms.",
     "a": "R1: mention symptoms or treatment but include NO not-for-emergencies notice. Carry any other "
          "notice the ad triggers.",
     "b": "R1: name a prescription medication but do NOT say it is prescribed only if clinically "
@@ -147,7 +147,8 @@ def recipe_prompt(r, attempt, avoid):
     if r["rules"]:
         lines.append("Violate exactly: " + ", ".join(f"{x} ({RULE_NAMES[x]})" for x in r["rules"]) + ".")
     else:
-        lines.append("Violate nothing: a fully compliant ad that carries every notice it triggers.")
+        lines.append("Violate nothing: a fully compliant ad that carries every notice it triggers. "
+                     "Keep it to 40 to 55 words in total, notices included.")  # C8 length balance
     others = [x for x in evaluate.RULES if x not in r["rules"] and x != "R1"]
     lines.append("Must NOT violate: " + "; ".join(f"{x} ({DONT[x]})" for x in others) + ".")
     lines.append(NOTICE_TEXT[r["missing"]])
@@ -232,6 +233,8 @@ def check_case(case, held):
         p.append(f"length {n} words outside {WORDS}")
     if "clean" in flags and labels:
         p.append("clean ad has labels")
+    if "R1" not in rules and has(text, "prescri") and not (has(text, "clinically") or has(text, "appropriate")):
+        p.append("R1(b): mentions prescribing without the clinically-appropriate notice, but no R1 label")
     if "near_miss" in flags and held and not all(has(text, x) for x in N1_PHRASES):
         p.append("C2: N1 lacks its required phrases")
     if not held and ({"near_miss", "a1", "a2"} & set(flags)) and \
