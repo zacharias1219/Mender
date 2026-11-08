@@ -19,7 +19,7 @@ import groq_client as gc
 import repair
 
 ROUNDS = 3        # LIMITS.md: Richard's one-proof budget (spec default 8)
-CANDIDATES = 2    # LIMITS.md: (spec default 3)
+CANDIDATES = 3    # LIMITS.md: spec default; raised from 2 after 4 pilots, before the full run
 MAX_RERUNS = 3    # stability reruns tried per round, best passer first
 STOP_AFTER = 3    # consecutive all-rejected rounds
 LEDGER = os.path.join(gd.DATA, "test_ledger.json")

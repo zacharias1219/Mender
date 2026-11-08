@@ -51,3 +51,12 @@ guarantees are unchanged. Measured reviewer cost (Step 3): about 570 tokens per 
 Short-circuiting (most candidates stop after the 27-ad gate check) makes a typical run
 about half of that. If a quota runs out, the run aborts and is resumable from cache, after
 the key is swapped through the secure form.
+
+## Update (2026-11-08, after 4 pilots, before the full run)
+
+Richard raised **CANDIDATES from 2 to 3** (the spec default), with ROUNDS staying at 3. The
+four pilots (3 x 2 each) proposed 24 patches and the gate approved none. The best patch
+raised gate F1 from 0.667 to 0.808 (+5 TP pairs) but broke a previously correct case (G3).
+No threshold changed. The test split had not been touched by then. New worst case is
+about 3 x (3 x 83 + 81 + 1) = ~990 reviewer calls; a typical run is about 350 calls, or
+about 200K tokens. If the daily quota runs out, the run resumes from cache on a new key.
