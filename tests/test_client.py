@@ -74,13 +74,13 @@ class ClientTest(unittest.TestCase):
         self.assertEqual(len(fake.sent), 1)
         self.assertNotIn(FAKE_KEY, str(cm.exception))
 
-    def test_json_validate_failed_is_bad_output_not_retried(self):
+    def test_json_validate_failed_is_cached_as_empty_reply_not_retried(self):
         body = b'{"error":{"message":"Failed to validate JSON","code":"json_validate_failed"}}'
         fake = self.use((400, {}, body))
-        with self.assertRaises(gc.GroqBadOutput):
-            self.call()
+        e = self.call()
+        self.assertEqual((e["content"], e["finish_reason"]), ("", "json_validate_failed"))
+        self.assertTrue(self.call()["cached"])  # replay makes no second call
         self.assertEqual(len(fake.sent), 1)
-        self.assertEqual(self.files(), [])
 
     def test_cache_hit_makes_no_call(self):
         fake = self.use(ok())

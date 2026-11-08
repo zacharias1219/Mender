@@ -7,6 +7,7 @@ import argparse
 import os
 import sys
 
+import evaluate as ev
 import gen_data as gd
 import groq_client as gc
 
@@ -66,10 +67,21 @@ def cmd_gen_data(a):
 
 
 def cmd_eval(a):
-    check_dataset()
+    digest = check_dataset()
     if a.split == "test":
         sys.exit("refused: the test split is scored only inside `python run.py run` (G7)")
-    sys.exit("eval: the reviewer is built in Step 3")
+    prompt = ev.load_prompt(a.prompt)
+    cases = [c for c in gd.read_jsonl(gd.DATASET) if c["split"] == a.split]
+    results = ev.evaluate_split(prompt, cases)
+    out = os.path.join(gd.ROOT, "runs", "eval", f"{prompt['version']}_{a.split}.jsonl")
+    ev.write_results(out, results)
+    print(f"dataset {digest[:12]}  prompt {prompt['version']}  split {a.split}  ads {len(cases)}")
+    print(ev.format_metrics(ev.metrics(results, cases)))
+    top = ev.clusters(results)
+    for (rule, kind), ids in top[:3]:
+        print(f"cluster {rule} {kind:<11} {len(ids)} cases: {' '.join(ids)}")
+    print(f"results: {os.path.relpath(out, gd.ROOT)}\nnetwork calls: {gc.network_calls}")
+    return 0
 
 
 def main():

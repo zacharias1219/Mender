@@ -153,7 +153,9 @@ def chat(model, messages, cache_dir=DEFAULT_CACHE, bypass_cache=False, **params)
 
     bypass_cache=True always calls the API (stability and confirmation reruns) and overwrites
     the entry. If finish_reason is "length", retries once with double max_completion_tokens;
-    a second cut-off is returned as is and the caller counts it as a parse failure.
+    a second cut-off is returned as is and the caller counts it as a parse failure. A reply that
+    Groq's JSON mode rejects comes back (and is cached) as content "" with finish_reason
+    "json_validate_failed".
     """
     key = cache_key(model, messages, params)
     path = os.path.join(cache_dir, key[:2], key + ".json")
@@ -161,7 +163,11 @@ def chat(model, messages, cache_dir=DEFAULT_CACHE, bypass_cache=False, **params)
         entry = _read_entry(path, key)
         if entry is not None:
             return {**entry, "cached": True}
-    data, rate = _request(model, messages, params)
+    try:
+        data, rate = _request(model, messages, params)
+    except GroqBadOutput:  # JSON mode rejected the reply: cache it as an empty reply so replays match
+        data, rate = {"model": model, "choices": [{"message": {"content": ""},
+                                                   "finish_reason": "json_validate_failed"}]}, {}
     if data["choices"][0].get("finish_reason") == "length":
         tok = "max_tokens" if "max_tokens" in params else "max_completion_tokens"
         data, rate = _request(model, messages, {**params, tok: 2 * int(params.get(tok) or 1024)})

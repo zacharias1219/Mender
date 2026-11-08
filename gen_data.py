@@ -274,9 +274,6 @@ def generate(log=print):
             hint = (avoid + [x for x in seen[-AVOID_CAP:] if x not in avoid])[:AVOID_CAP] if attempt else []
             try:
                 entry = gc.chat(GEN_MODEL, recipe_prompt(r, attempt, hint), **GEN_PARAMS)
-            except gc.GroqBadOutput as e:  # model wrote invalid JSON: a failed attempt
-                problems = [f"bad JSON: {e}"]
-                continue
             except gc.GroqError as e:  # quota or outage: save progress; rerun resumes from cache
                 failures.append((r["id"], [f"API: {e}"]))
                 log(f"{r['id']}: stopped, {e}")
