@@ -177,7 +177,7 @@ def parse_reply(content):
     text = content.strip()
     if text.startswith("```"):
         text = re.sub(r"^```[a-z]*\s*|\s*```$", "", text)
-    data = json.loads(text.translate(ASCII))
+    data = json.loads(text)  # parse first: ASCII-izing curly quotes earlier would break the JSON
     if not isinstance(data, dict) or not isinstance(data.get("ad"), str) \
             or not isinstance(data.get("labels"), list):
         raise ValueError("reply must be an object with 'ad' and 'labels'")
@@ -185,8 +185,8 @@ def parse_reply(content):
     for l in data["labels"]:
         if not isinstance(l, dict) or not isinstance(l.get("quotes"), list):
             raise ValueError("bad label")
-        labels.append({"rule": l.get("rule"), "quotes": [str(q) for q in l["quotes"]]})
-    return data["ad"].strip(), labels
+        labels.append({"rule": l.get("rule"), "quotes": [str(q).translate(ASCII) for q in l["quotes"]]})
+    return data["ad"].translate(ASCII).strip(), labels
 
 
 def ngrams(text, n=8):

@@ -117,9 +117,9 @@ class ValidatorTest(unittest.TestCase):
 
 class GenerationHelpersTest(unittest.TestCase):
     def test_parse_reply_normalizes_typography_in_ad_and_quotes(self):
-        raw = '{"ad": "It’s risk‑free.", "labels": [{"rule": "R3", "quotes": ["risk‑free"]}]}'
+        raw = '{"ad": "It\u2019s risk\u2011free. \u201cBest ever,\u201d says Ann.", "labels": [{"rule": "R3", "quotes": ["risk\u2011free"]}]}'
         ad, labels = gd.parse_reply(raw)
-        self.assertEqual(ad, "It's risk-free.")
+        self.assertEqual(ad, 'It\'s risk-free. "Best ever," says Ann.')
         self.assertEqual(labels[0]["quotes"], ["risk-free"])
 
     def test_parse_reply_rejects_bad_shape(self):
