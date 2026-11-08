@@ -119,7 +119,7 @@ def _request(model, messages, params):
             cls = GroqBadOutput if err.get("code") == "json_validate_failed" else GroqError
             raise cls(f"HTTP {status} from Groq for {model}: {_safe_error(raw)}")
         else:
-            last = last if status == 0 else f"HTTP {status}"
+            last = last if status == 0 else f"HTTP {status}: {_safe_error(raw)[:120]}"
         if attempt == MAX_RETRIES:
             break
         wait = min(BACKOFF_CAP, BACKOFF_BASE * 2 ** attempt)
