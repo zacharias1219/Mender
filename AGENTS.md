@@ -104,8 +104,9 @@ and `output_format`, which is locked), `data/` (dataset, `test_ledger.json`,
   broke recipes, so generation uses "medium". The loop's ROUNDS and CANDIDATES get fixed in
   LIMITS.md after Step 3 measures reviewer tokens, before any run.
 - **C6:** two ads are near-duplicates if they share any 8-gram of lowercased word tokens,
-  or have token-set Jaccard >= 0.6 (strict reading). On a shared 8-gram, the retry prompt
-  names the phrase to avoid.
+  or have token-set Jaccard >= 0.6 (strict reading). Richard confirmed the strict reading on 2026-11-08.
+  Retries (never attempt 0) name this ad's colliding phrases plus the run's most recent ones,
+  up to 12. Nearly every collision is notice boilerplate.
 - **Typography:** generated ads and quotes are converted to ASCII (non-breaking hyphens,
   curly quotes, nbsp) before validation. This keeps "verbatim substring" matching robust.
 - **Recipes** (`gen_data.recipes()`, seed 7) fix the rules and flags per ad. Each prompt

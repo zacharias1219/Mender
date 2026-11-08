@@ -23,6 +23,7 @@ GEN_MODEL = "openai/gpt-oss-120b"
 GEN_PARAMS = {"temperature": 1.0, "max_completion_tokens": 2048, "reasoning_effort": "medium",
               "response_format": {"type": "json_object"}}
 MAX_ATTEMPTS = 4  # first try plus up to 3 retries
+AVOID_CAP = 12    # retries name this ad's collisions plus the run's most recent ones, up to 12
 SPLITS = {"train": 36, "gate": 27, "test": 27}
 CLEAN = {"train": 10, "gate": 8, "test": 8}
 FLOOR = {"train": 2, "gate": 1, "test": 1}
@@ -243,12 +244,13 @@ def check_case(case, held):
 
 def generate(log=print):
     """Generate every recipe through the cache; write data/draft.jsonl. Returns (cases, failures)."""
-    cases, failures = [], []
+    cases, failures, seen = [], [], []  # seen: every colliding 8-gram so far, in order
     for r in recipes():
         avoid, problems = [], []
         for attempt in range(MAX_ATTEMPTS):
+            hint = (avoid + [x for x in seen[-AVOID_CAP:] if x not in avoid])[:AVOID_CAP] if attempt else []
             try:
-                entry = gc.chat(GEN_MODEL, recipe_prompt(r, attempt, avoid), **GEN_PARAMS)
+                entry = gc.chat(GEN_MODEL, recipe_prompt(r, attempt, hint), **GEN_PARAMS)
             except gc.GroqBadOutput as e:  # model wrote invalid JSON: a failed attempt
                 problems = [f"bad JSON: {e}"]
                 continue
@@ -272,7 +274,10 @@ def generate(log=print):
                 if why:
                     problems.append(f"C6: near-duplicate of {other['id']} ({why})")
                     if why.startswith("8-gram"):
-                        avoid.append(why[len("8-gram: "):])
+                        phrase = why[len("8-gram: "):]
+                        avoid.append(phrase)
+                        if phrase not in seen:
+                            seen.append(phrase)
             if not problems:
                 cases.append(case)
                 break
