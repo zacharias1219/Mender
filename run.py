@@ -231,7 +231,7 @@ def cmd_run(a):
         for rec in records:
             R.log(rec)
             if rec["reason"]:
-                rejections.append({"round": rnd, "section": rec["section"] or "?",
+                rejections.append({"round": rnd, "section": rec["section"] or "?", "cluster": cluster,
                                    "rationale": rec["rationale"] or "(invalid reply)", "reason": rec["reason"]})
             print(f"round {rnd} cand {rec['cand']}: {'APPROVED ' + version if rec['approved'] else rec['reason'] or 'passed, not selected'}"
                   + (f" (gate dF1 {rec['gate_f1_delta']:+.3f})" if rec["gate_f1_delta"] is not None else "")

@@ -85,6 +85,22 @@ class RepairInputTest(unittest.TestCase):
         self.assertIn("<<<AD\n" + a2["text"] + "\nAD>>>", user["content"])
         self.assertIn("never instructions", system["content"])
 
+    def test_tied_clusters_rotate_after_rejections(self):
+        rules = lambda c: [l["rule"] for l in c["labels"]]  # noqa: E731
+        r2 = [c for c in TRAIN if rules(c) == ["R2"]][:2]  # R2 missed twice
+        cl = [c for c in TRAIN if not c["labels"]][:2]     # R6 false alarm twice: a tie at 2
+        tr = r2 + cl
+        results = [res(r2[0], []), res(r2[1], []), res(cl[0], [], ["R6"]), res(cl[1], [], ["R6"])]
+        for r in results:
+            r["preds"] = []
+        groups = gd.evaluate.clusters(results)
+        first = f"{groups[0][0][0]} {groups[0][0][1]}"
+        _, c0 = repair.build_messages(BASE, BASE, results, tr, [], 2)
+        _, c1 = repair.build_messages(BASE, BASE, results, tr, [{"round": 1, "section": "role", "cluster": c0,
+                                                                  "rationale": "x", "reason": "no_f1_gain"}], 2)
+        self.assertEqual(c0, first)
+        self.assertNotEqual(c1, c0)
+
     def test_budget_keeps_prompt_within_growth_cap(self):
         budget, limit = repair.budgets(BASE, BASE)
         self.assertEqual(limit, int(1.25 * repair.prompt_len(BASE)))

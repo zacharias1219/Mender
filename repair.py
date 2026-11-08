@@ -43,7 +43,12 @@ def build_messages(current, base, train_results, train_cases, rejections, n):
     if any(r["case_id"] not in by_id for r in train_results):
         raise ValueError("repair input must come from the train split only (G6)")
     groups = ev.clusters(train_results)
-    (rule, kind), ids = groups[0] if groups else (("none", "none"), [])
+    if groups:  # largest cluster; on a tie, the one earlier rejected patches targeted least
+        tied = [g for g in groups if len(g[1]) == len(groups[0][1])]
+        tried = [x.get("cluster") for x in rejections]
+        (rule, kind), ids = min(tied, key=lambda g: tried.count(f"{g[0][0]} {g[0][1]}"))
+    else:
+        (rule, kind), ids = ("none", "none"), []
     examples = []
     for i, cid in enumerate(ids[:MAX_EXAMPLES], 1):
         res = next(r for r in train_results if r["case_id"] == cid)
@@ -54,7 +59,7 @@ def build_messages(current, base, train_results, train_cases, rejections, n):
     stats = (f"micro F1 {m['micro_f1'][0]:.3f}; clean false-positive rate {m['clean_fpr'][0]:.3f}; "
              + "; ".join(f"{r} recall {m[f'rule_recall[{r}]'][0]:.3f}" for r in ev.RULES))
     budget, limit = budgets(current, base)
-    limits = "; ".join(f"{s} {b} characters, about {b // 6} words (now {len(current['sections'][s])})"
+    limits = "; ".join(f"{s} {b} characters, about {b // 7} words (now {len(current['sections'][s])})"
                        for s, b in budget.items())
     past = "\n".join(f"- round {x['round']} {x['section']}: {x['rationale'][:200]} -> rejected: {x['reason']}"
                      for x in rejections) or "none"
