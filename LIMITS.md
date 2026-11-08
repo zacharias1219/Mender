@@ -1,38 +1,44 @@
 # Groq free-tier limits (BUILD_STEPS Step 1, check 4)
 
-Values marked *header* were read from the `x-ratelimit-*` response headers on
-2026-11-08 (`python groq_client.py --ping`). Groq reports requests per **day** and tokens
-per **minute** in those headers. Richard fills in the blanks from console.groq.com
-(Settings, Limits), since the API doesn't report them.
+Source: Richard's Groq console (Settings, Limits), 2026-11-08. The RPD and TPM rows match the
+`x-ratelimit-*` headers returned by `python groq_client.py --ping`.
 
 | Limit | openai/gpt-oss-20b (reviewer) | openai/gpt-oss-120b (generator, repair) |
 |---|---|---|
-| Requests / minute (RPM) | ___ (console) | ___ (console) |
-| Requests / day (RPD) | 1,000 (header) | 1,000 (header) |
-| Tokens / minute (TPM) | 8,000 (header) | 8,000 (header) |
-| Tokens / day (TPD) | ___ (console) | ___ (console) |
+| Requests / minute | 30 | 30 |
+| Requests / day | 1,000 | 1,000 |
+| Tokens / minute | 8,000 | 8,000 |
+| **Tokens / day** | **200,000** | **200,000** |
+
+Reasoning tokens count toward usage. A tiny JSON call on 120b used 245 tokens, of which
+109 were reasoning.
 
 ## Fit against ARCHITECTURE.md section 8
 
-| Phase | Calls | Model | Fits RPD? |
-|---|---|---|---|
-| Data generation | ~90 plus retries | 120b | yes |
-| 8 rounds x 3 candidates, worst case | ~1,700 | 20b | **no**: 1,000/day |
-| 8 rounds, repair | 24 | 120b | yes |
+Tokens per day bind first. The tokens per call below are estimates, until Step 3 measures
+`usage`, which is stored in every cache entry.
 
-- **Requests:** the worst case needs about 1.7 days of 20b requests. Short-circuiting and the
-  cache usually cut this a lot, and a run can resume from cache the next day (abort rule 4).
-- **Tokens per minute probably bind first.** A tiny ping used about 330 tokens with
-  reasoning. A reviewer call (full prompt plus ad plus reasoning) is estimated at about
-  2,000 tokens, which allows about 4 calls per minute, so about 7 minutes per 27-ad split.
-  Step 3 measures real `usage` per call (it's stored in every cache entry) and replaces
-  this estimate.
-- **Tokens per day may be the real ceiling.** Once TPD is known:
-  calls per day ≈ TPD / tokens per call. If that is below the run's call count, lower
-  `ROUNDS` or `CANDIDATES` in `run.py` and record the new worst case here, before any full
-  run (BUILD_STEPS rule: never after seeing results).
+| Phase | Calls | Est. tokens per call | Est. tokens | Days at 200K |
+|---|---|---|---|---|
+| Data generation (120b) | ~90 + retries | ~1,500 | ~135K-170K | 1 (fits) |
+| Baseline train + gate (20b) | 63 | ~1,500 | ~95K | 0.5 |
+| Typical round, 3 candidates (20b) | ~81 gate + ~36 train + ~27 rerun | ~1,500 | ~215K | ~1 |
+| Worst case, 8 rounds x 3 (20b) | ~1,750 | ~1,500 | ~2.6M | **~13 (does not fit)** |
+| Final test scoring, v000 + final (20b) | 54 | ~1,500 | ~80K | 0.4 |
 
-## Decision
+- **Requests aren't the problem.** 30 per minute and 1,000 per day fit easily. At about
+  1,500 tokens per call, 8,000 TPM allows about 5 calls per minute, so a 27-ad split takes
+  about 6 minutes. The client honors `Retry-After` on 429.
+- **The full run spans several days by design.** When the daily quota runs out, calls
+  exhaust their retries and the run aborts. Everything is cached, so rerunning the same
+  command the next day resumes at no cost (abort rule 4).
 
-ROUNDS = 8, CANDIDATES = 3 for now. To be revisited when TPD and the measured tokens per
-call are in.
+## Decision (pending: must close before any `run.py run`, after Step 3 measures tokens per call)
+
+Levers, in the order to try them. None of them touch the test split.
+1. Fewer reviewer tokens per call: `reasoning_effort` "low" and a compact `v000.json`.
+2. `CANDIDATES` 3 to 2 (cuts each round by about a third).
+3. `ROUNDS` 8 to 4.
+
+The worst case and the chosen values will be written here before any run. They must not
+be changed after seeing results.

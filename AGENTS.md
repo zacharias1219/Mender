@@ -97,6 +97,31 @@ and `output_format`, which is locked), `data/` (dataset, `test_ledger.json`,
   `runs/` isn't committed, so copy the final `REPORT.md` and `report.svg` into
   `docs/results/` (Step 5).
 
+## Decisions and interpretations (keep in sync with the code)
+
+- **Budget:** 200K tokens per day per model binds. A gen call is about 1,500-2,200 tokens
+  with `reasoning_effort` "medium" (about 65% of it reasoning). "Low" halves the tokens but
+  broke recipes, so generation uses "medium". The loop's ROUNDS and CANDIDATES get fixed in
+  LIMITS.md after Step 3 measures reviewer tokens, before any run.
+- **C6:** two ads are near-duplicates if they share any 8-gram of lowercased word tokens,
+  or have token-set Jaccard >= 0.6 (strict reading). On a shared 8-gram, the retry prompt
+  names the phrase to avoid.
+- **Typography:** generated ads and quotes are converted to ASCII (non-breaking hyphens,
+  curly quotes, nbsp) before validation. This keeps "verbatim substring" matching robust.
+- **Recipes** (`gen_data.recipes()`, seed 7) fix the rules and flags per ad. Each prompt
+  states which rules to violate, which must not be violated, and which notices to include
+  or omit. Retries put the attempt number into the prompt, so every attempt has its own
+  cache key and reruns replay exactly.
+- **N1** = the single held-out `near_miss` ad (flags stay within the schema: clean,
+  near_miss, a1, a2, multi). Train has 3 near-misses, plus one a1 and one a2 with other
+  surface forms.
+- **Freeze** renames `data/draft.jsonl` to `data/dataset.jsonl`, so the spot-checked bytes
+  are the frozen bytes. It refuses unless C1 to C8 pass, `data/spotcheck.md` names this
+  draft's hash with `Result: N / 15` where N >= 14, and the keyword baseline is < 0.70 on
+  gate and test. The draft is committed while under review.
+- **Scoring core** (`evaluate.overlaps`, `score_case`, `micro`) was written in Step 2 for
+  the keyword baseline. Step 3 adds the reviewer on top of it.
+
 ## Git
 
 - Repo `zacharias1219/Mender`. Cloud sessions develop on their assigned `claude/...`
@@ -109,13 +134,13 @@ and `output_format`, which is locked), `data/` (dataset, `test_ledger.json`,
 | Date | Step | State | Notes |
 |---|---|---|---|
 | 2026-11-08 | 0 | done | AGENTS.md, CLAUDE.md, .gitignore, 4 specs in docs/. Step 5 check 4 now matches key-shaped strings only (Richard approved). Groq reachable, UA quirk found |
-| 2026-11-08 | 1 | checks 1-3 pass; 4 waits on Richard | groq_client.py and 11 offline tests. Live ping OK on both models, replay 0 calls. Headers: RPD 1,000, TPM 8,000 per model. LIMITS.md needs RPM and TPD from the console |
-| | 2 | next | gen_data.py, tests/test_validator.py (starts after check 4) |
+| 2026-11-08 | 1 | done | groq_client.py and 11 offline tests. Live ping OK on both models, replay 0 calls. LIMITS.md filled (30 RPM, 1K RPD, 8K TPM, 200K TPD per model). Loop budget decision deferred to after Step 3 |
+| 2026-11-08 | 2 | in progress | gen_data.py, run.py gen-data, tests/test_validator.py (22 tests). Pilot fixed missing notices and typography |
 
 ## Open items
 
 1. Final branch and PR target: session branch vs `selfrepair-v1` into `main` (ask Richard).
-2. Richard fills in `LIMITS.md` from the Groq console (Step 1, check 4).
+2. Choose ROUNDS and CANDIDATES in LIMITS.md after Step 3 measures reviewer tokens per call, before any run.
 3. Richard approves `prompts/v000.json` before any eval (Step 3).
 4. Richard records the 15-ad spot-check in `data/spotcheck.md` before freezing (Step 2).
 5. EVAL_SPEC §7.9: revisit using a non-gpt-oss generator after the first full run.
