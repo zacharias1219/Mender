@@ -150,9 +150,14 @@ and `output_format`, which is locked), `data/` (dataset, `test_ledger.json`,
 | 2026-11-08 | 1 | done | groq_client.py and 11 offline tests. Live ping OK on both models, replay 0 calls. LIMITS.md filled (30 RPM, 1K RPD, 8K TPM, 200K TPD per model). Loop budget decision deferred to after Step 3 |
 | 2026-11-08 | 2 | done | Frozen data/dataset.jsonl sha256 c6cc2e21d334541ba16715ed231ff5afe62f42b1e4d5de05e16272c50ea073de. C1-C8 PASS, keyword F1 gate 0.548, test 0.407 (S10). Spot-check 15/15: Richard said "all correct" in chat, Claude recorded it (S9). Tamper test aborts before any call (G9) |
 | 2026-11-08 | 3 | done | Checks 1-5 pass. v000 rule_definitions made terse with Richard's approval (the first v000 scored train F1 0.896, above the 0.80 headroom bound). v000: train F1 0.769, gate 0.667, R1 recall 0.167/0.000, about 570 tokens per call. Budget ROUNDS=3, CANDIDATES=2 in LIMITS.md |
-| | 4 | next | gate.py, repair.py, run loop, report.py, tests; one proof run |
+| 2026-11-08 | 4 | run done; S1 FAIL | 4 pilots (3x2) and 1 full run (3x3, runs/20261108T152027Z), 33 patches, 0 approved. Full run: S2 S5-S12 PASS; S1 S1a-c S3 S4 FAIL. Test (scored once, v000 = final) micro F1 0.809, case acc 0.704. Every reason code but unstable_on_rerun fired on real patches. Evidence in docs/results/. A second full run needs --reuse-test |
 
 ## Open items
+
+0. S1 not met. Levers that don't touch test: ROUNDS, CANDIDATES, the baseline prompt, and the repair
+   agent's input. Blockers seen: the G3 no-regression rule (the best patch had gate F1 0.667->0.808,
+   +5 TP, but broke one correct case), the +2 TP floor (patches that only cut false alarms), and
+   the 25% growth cap on a terse 856-char v000. A new full run needs `--reuse-test` (stamped).
 
 1. Final branch and PR target: session branch vs `selfrepair-v1` into `main` (ask Richard).
 2. EVAL_SPEC §7.9: revisit using a non-gpt-oss generator after the first full run.

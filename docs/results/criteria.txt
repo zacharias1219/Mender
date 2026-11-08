@@ -1,0 +1,15 @@
+S1   FAIL  accepted patch: 0 approved
+S1a  FAIL  it raises train micro F1: no patch
+S1b  FAIL  it raises gate F1 >= +0.030 and TP >= +2: no patch
+S1c  FAIL  no confirmed rule drop or case regression: no patch
+S2   PASS  a rejected candidate with a logged reason code: case_regression 1, no_f1_gain 4, parse_failures 1, precheck_failed 2, rule_recall_drop 1
+S3   FAIL  test micro F1 >= baseline + 0.050, more cases improved than worsened: 0.809 -> 0.809 (+0.000); improved 0, worsened 0
+S4   FAIL  test case accuracy >= baseline + 0.050: 0.704 -> 0.704 (+0.000)
+S5   PASS  no test rule recall below baseline: none below
+S6   PASS  parse failures, final <= baseline and <= 5%: 0.000 -> 0.000
+S7   PASS  gate self-test: 3 bad candidates rejected: 3/3 (flag everything: no_f1_gain, flag nothing: no_f1_gain, helps one rule, wrecks another: rule_recall_drop)
+S8   PASS  re-run from cache: score delta 0.000: delta 0.000, 0 network calls
+S9   PASS  spot-check >= 14 of 15: 15/15
+S10  PASS  90 ads, 26 clean, rule floors, keyword F1 < 0.70 on gate and test: 90 ads, 26 clean, floors met, keyword gate 0.548 test 0.407
+S11  PASS  full run on the free tier, 0 unrecovered API failures: completed True, 0 exhausted calls, all recovered
+S12  PASS  test clean FPR <= baseline, adversarial recall >= baseline: FPR 0.000 -> 0.000; adversarial recall 0.667 -> 0.667
