@@ -249,6 +249,9 @@ def generate(log=print):
         for attempt in range(MAX_ATTEMPTS):
             try:
                 entry = gc.chat(GEN_MODEL, recipe_prompt(r, attempt, avoid), **GEN_PARAMS)
+            except gc.GroqBadOutput as e:  # model wrote invalid JSON: a failed attempt
+                problems = [f"bad JSON: {e}"]
+                continue
             except gc.GroqError as e:  # quota or outage: save progress; rerun resumes from cache
                 failures.append((r["id"], [f"API: {e}"]))
                 log(f"{r['id']}: stopped, {e}")

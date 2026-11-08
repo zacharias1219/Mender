@@ -33,6 +33,11 @@ class GroqError(Exception):
     """A call failed for good: retries exhausted, or a non-retryable HTTP error."""
 
 
+class GroqBadOutput(GroqError):
+    """Groq rejected the model's own reply (JSON mode: code json_validate_failed). Not an API
+    failure: callers count it as a bad reply (a failed attempt, or a parse failure)."""
+
+
 def _post(body, headers):
     """Send one request. Returns (status, response headers, body bytes); never raises on HTTP status."""
     req = urllib.request.Request(API_URL, data=body, headers=headers, method="POST")
@@ -110,7 +115,9 @@ def _request(model, messages, params):
                 rate = {k.lower(): v for k, v in rh.items() if k.lower().startswith("x-ratelimit")}
                 return data, rate
         elif status and status != 429 and status < 500:
-            raise GroqError(f"HTTP {status} from Groq for {model}: {_safe_error(raw)}")
+            err = _error_body(raw)
+            cls = GroqBadOutput if err.get("code") == "json_validate_failed" else GroqError
+            raise cls(f"HTTP {status} from Groq for {model}: {_safe_error(raw)}")
         else:
             last = last if status == 0 else f"HTTP {status}"
         if attempt == MAX_RETRIES:
@@ -123,6 +130,14 @@ def _request(model, messages, params):
             pass
         _sleep(wait)
     raise GroqError(f"retries exhausted for {model} after {MAX_RETRIES + 1} attempts ({last})")
+
+
+def _error_body(raw):
+    try:
+        err = json.loads(raw)["error"]
+        return err if isinstance(err, dict) else {}
+    except (ValueError, KeyError, TypeError):
+        return {}
 
 
 def _safe_error(raw):
